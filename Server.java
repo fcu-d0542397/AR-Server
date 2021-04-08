@@ -159,17 +159,17 @@ public class Server {
                         bw.write(order + "\n");
                         bw.flush();
                         System.out.println(order);
-//                        if (buf.readLine().equals("mode")) {
-//                            System.out.println("dasdsadasdddddd");
-//                            bw.write(cropType + "\n");
-//                            bw.flush();
-//                        }
+                        // if (buf.readLine().equals("mode")) {
+                        // System.out.println("dasdsadasdddddd");
+                        // bw.write(cropType + "\n");
+                        // bw.flush();
+                        // }
 
                     } else if (getIDString.equals("image")) {
                         hostID.add(buf.readLine());
                         System.out.println("hostID : " + hostID);
-//                        cropType = buf.readLine();
-//                        System.out.println("cropType : " + cropType);
+                        // cropType = buf.readLine();
+                        // System.out.println("cropType : " + cropType);
                         String imageType = buf.readLine();
                         Thread.sleep(300);
                         ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
@@ -178,11 +178,11 @@ public class Server {
                             FileOutputStream fos = new FileOutputStream("./image" + hostID.size() + "." + imageType);
                             System.out.println("buffer len: " + String.valueOf(buffer.length));
                             fos.write(buffer);
-//                            Thread.sleep(200);
+                            // Thread.sleep(200);
                             fos.close();
                             clients.remove(socket);
                             --count;
-//                            gifToImages("image1.gif");
+                            // gifToImages("image1.gif");
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
                         }
@@ -204,8 +204,8 @@ public class Server {
                         System.out.println(physicalX[userId.size() - 1] + "xxxxx");
                         System.out.println(physicalY[userId.size() - 1] + "yyyyy");
                         System.out.println("ssssadsadasdsadsadsad");
-                         phyXString = "";
-                         phyYString = "";
+                        phyXString = "";
+                        phyYString = "";
                         for (int i = 0; i < userId.size(); i++) {
                             if (i == userId.size() - 1) {
                                 phyXString = phyXString + physicalX[i];
@@ -230,7 +230,7 @@ public class Server {
                     // oos.writeObject(buffer);
                     // }
                     String msg;
-//                    int i = 0;
+                    // int i = 0;
                     while ((msg = buf.readLine()) != null) {
                         System.out.println(msg);
                         if (msg.indexOf("clear") >= 0) {
@@ -239,9 +239,8 @@ public class Server {
                             castMsg2(msg);
                         } else if (msg.indexOf("physical") >= 0) {
                             Thread.sleep(500);
-                            bw.write(phyXString +"?"+phyYString+"\n");
+                            bw.write(phyXString + "?" + phyYString + "\n");
                             bw.flush();
-
 
                         } else {
                             String[] tmpArray = msg.split(",");
@@ -261,7 +260,7 @@ public class Server {
                                 type = "mp4";
                             }
                             castMsg2(type + "," + msg);
-//                            Thread.sleep(100);
+                            // Thread.sleep(100);
                             System.out.println("接收到的資料是：" + msg);
                             String unSplite = tmpArray[tmpArray.length - 1];
                             System.out.println("unSplite: " + unSplite);
@@ -452,7 +451,7 @@ public class Server {
                     ObjectOutputStream oos = new ObjectOutputStream(clients.get(clientIp[i]).getOutputStream());
                     Thread.sleep(100);
                     oos.writeObject(buffer);
-//                    Thread.sleep(200);
+                    // Thread.sleep(200);
                     System.out.println(545646546);
                 }
 
@@ -464,7 +463,7 @@ public class Server {
 
             } catch (IOException | InterruptedException e) {
             }
-//
+            //
 
         }
         for (Socket socket : clientArrays) {
@@ -585,10 +584,10 @@ public class Server {
                 BufferedImage bufferedImage = decoder.getFrame(i);// ?取每?BufferedImage流
                 encoder.addFrame(bufferedImage);
             }
-//            else if (i % 2 == 0) {
-//                BufferedImage bufferedImage = decoder.getFrame(i);// ?取每?BufferedImage流
-//                encoder.addFrame(bufferedImage);
-//            }
+            // else if (i % 2 == 0) {
+            // BufferedImage bufferedImage = decoder.getFrame(i);// ?取每?BufferedImage流
+            // encoder.addFrame(bufferedImage);
+            // }
         }
         encoder.finish();
         String path3 = "./imageccccc.gif";
