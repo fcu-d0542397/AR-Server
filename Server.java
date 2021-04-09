@@ -311,8 +311,8 @@ public class Server {
                     // // w.println("OK 哈哈哈 " + i++);
                     // }
 
-                    while (socket.isConnected()) {
-                    }
+                    // while (socket.isConnected()) {
+                    // }
                 } catch (IOException e) {
                     e.getStackTrace();
                 } catch (InterruptedException e) {
@@ -320,9 +320,9 @@ public class Server {
                     e.printStackTrace();
                 } finally {
                     // 移除客戶端
-                    clients.remove(socket);
-                    --count;
-                    System.out.println("現在使用者個數：" + count);
+                    // clients.remove(socket);
+                    // --count;
+                    // System.out.println("現在使用者個數：" + count);
                 }
             }
         });
@@ -440,6 +440,7 @@ public class Server {
         // System.out.println(clientArrays);
 
         // 走訪 clientArrays 中的每一個元素
+        long time1, time2, time3;
 
         for (int i = 0; i < clientIp.length; i++) {
             try {
@@ -450,8 +451,11 @@ public class Server {
                 if (clientIp[i] != -1) {
                     ObjectOutputStream oos = new ObjectOutputStream(clients.get(clientIp[i]).getOutputStream());
                     Thread.sleep(100);
+                    time1 = System.currentTimeMillis();
                     oos.writeObject(buffer);
                     // Thread.sleep(200);
+                    time2 = System.currentTimeMillis();
+                    System.out.println("doSomething()花了：" + (time2-time1)/1000 + "秒");
                     System.out.println(545646546);
                 }
 
