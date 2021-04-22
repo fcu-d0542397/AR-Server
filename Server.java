@@ -36,6 +36,8 @@ public class Server {
 
     private static int order = 0;
     public static String location;
+    public static int[] imageSize = new int[16];
+    public static int[][] imageSended = new int[16][16];
     // public static String lng;
 
     // 用 ArrayList 來儲存每個 Client 端連線
@@ -176,6 +178,7 @@ public class Server {
                         try {
                             byte[] buffer = (byte[]) ois.readObject();
                             FileOutputStream fos = new FileOutputStream("./image" + hostID.size() + "." + imageType);
+                            imageSize[hostID.size() - 1] = buffer.length;
                             System.out.println("buffer len: " + String.valueOf(buffer.length));
                             fos.write(buffer);
                             // Thread.sleep(200);
@@ -241,7 +244,21 @@ public class Server {
                             Thread.sleep(500);
                             bw.write(phyXString + "?" + phyYString + "\n");
                             bw.flush();
-
+                        } else if (msg.indexOf("image2") >= 0) {
+                            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                            try {
+                                byte[] buffer = (byte[]) ois.readObject();
+                                FileOutputStream fos = new FileOutputStream("./image" + hostID.size() + "." + "jpg");
+                                System.out.println("buffer len: " + String.valueOf(buffer.length));
+                                fos.write(buffer);
+                                // Thread.sleep(200);
+                                fos.close();
+                                clients.remove(socket);
+                                --count;
+                                // gifToImages("image1.gif");
+                            } catch (ClassNotFoundException e) {
+                                e.printStackTrace();
+                            }
                         } else {
                             String[] tmpArray = msg.split(",");
                             int imageNumber = Integer.valueOf(tmpArray[tmpArray.length - 2]);
@@ -259,7 +276,8 @@ public class Server {
                             if (file.exists()) {
                                 type = "mp4";
                             }
-                            castMsg2(type + "," + msg);
+
+                            castMsg2(imageSize[imageNumber - 1] +","+ type + "," + msg);
                             // Thread.sleep(100);
                             System.out.println("接收到的資料是：" + msg);
                             String unSplite = tmpArray[tmpArray.length - 1];
@@ -444,21 +462,31 @@ public class Server {
 
         for (int i = 0; i < clientIp.length; i++) {
             try {
-                // 創造網路輸出串流
-                FileInputStream fis = new FileInputStream("./image" + fileName + "." + type);
-                byte[] buffer = new byte[fis.available()];
-                fis.read(buffer);
-                if (clientIp[i] != -1) {
-                    ObjectOutputStream oos = new ObjectOutputStream(clients.get(clientIp[i]).getOutputStream());
-                    Thread.sleep(100);
-                    time1 = System.currentTimeMillis();
-                    oos.writeObject(buffer);
-                    // Thread.sleep(200);
-                    time2 = System.currentTimeMillis();
-                    System.out.println("doSomething()花了：" + (time2-time1)/1000 + "秒");
-                    System.out.println(545646546);
-                }
+                // BufferedReader readBuf = new BufferedReader(new
+                // InputStreamReader(clients.get(clientIp[i]).getInputStream()));
+                // if(readBuf.readLine().equals("exist")){
 
+                // }
+                // System.out.println(client);
+                // 創造網路輸出串流
+                if (imageSended[Integer.valueOf(fileName) - 1][i] == 0) {
+                    imageSended[Integer.valueOf(fileName) - 1][i] = 1;
+                    FileInputStream fis = new FileInputStream("./image" + fileName + "." + type);
+                    byte[] buffer = new byte[fis.available()];
+                    fis.read(buffer);
+                    if (clientIp[i] != -1) {
+                        ObjectOutputStream oos = new ObjectOutputStream(clients.get(clientIp[i]).getOutputStream());
+                        Thread.sleep(100);
+                        time1 = System.currentTimeMillis();
+                        oos.writeObject(buffer);
+                        // Thread.sleep(200);
+                        time2 = System.currentTimeMillis();
+                        System.out.println("doSomething()花了：" + (time2 - time1) / 1000 + "秒");
+                        System.out.println(545646546);
+                    }
+                } else {
+
+                }
                 // BufferedReader buf = new BufferedReader(new
                 // InputStreamReader(socket.getInputStream()));
                 // PrintWriter w = new PrintWriter(new
