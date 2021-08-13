@@ -26,11 +26,19 @@ public class Server {
     private static ArrayList<String> userIp = new ArrayList();
     private static ArrayList<String> userImage = new ArrayList();
     private static ArrayList<String> hostID = new ArrayList();
+    private static ArrayList<String> dataPath = new ArrayList();
+    // private static ArrayList<String> textSpeed = new ArrayList();
     static ArrayList<Integer> clientIndex = new ArrayList<>();
+    
+    static String[] runningText = new String[16];
+    static String[] dirNumber = new String[16];
+    static String[] textSpeed = new String[16];
     static double[] physicalX = new double[16];
     static double[] physicalY = new double[16];
     static String phyXString = "";
     static String phyYString = "";
+    public static Thread t2;
+    public static String mode;
 
     public static String cropType;
 
@@ -38,12 +46,31 @@ public class Server {
     public static String location;
     public static int[] imageSize = new int[16];
     public static int[][] imageSended = new int[16][16];
+
+    public static String[] virtualCommand = new String[16];
+    public static String[] virtualIp = new String[16];
+    public static int virtualCount = 0;
+
+    public static int palyFlag = 0;
+    public static String dirFlag = "-1";
+    // public static String dataPath;
     // public static String lng;
 
     // 用 ArrayList 來儲存每個 Client 端連線
     private static ArrayList<Socket> clients = new ArrayList();
 
     public static void main(String[] args) {
+
+        for (int i = 0; i < virtualIp.length; i++) {
+            virtualIp[i] = "-1";
+        }
+        t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("successfully");
+            }
+        });
+        t2.start();
         for (int i = 1; i < 30; i++) {
             File file = new File(".\\image" + i + ".jpg");
             if (file.exists()) {
@@ -56,6 +83,16 @@ public class Server {
                 System.out.println(file.getName() + "File deleted successfully");
             }
             file = new File(".\\image" + i + ".mp4");
+            if (file.exists()) {
+                file.delete();
+                System.out.println(file.getName() + "File deleted successfully");
+            }
+            file = new File(".\\run" + i + ".jpg");
+            if (file.exists()) {
+                file.delete();
+                System.out.println(file.getName() + "File deleted successfully");
+            }
+            file = new File(".\\run" + i + ".gif");
             if (file.exists()) {
                 file.delete();
                 System.out.println(file.getName() + "File deleted successfully");
@@ -160,6 +197,23 @@ public class Server {
                         // Thread.sleep(500);
                         bw.write(order + "\n");
                         bw.flush();
+                        Thread.sleep(100);
+                        bw.write(socket.getInetAddress().toString() + "\n");
+                        bw.flush();
+                        bw.write(dataPath.get(dataPath.size()-1) + "\n");
+                        bw.flush();
+                        System.out.println("dirFlag: "+dirFlag);
+                        bw.write(dirFlag + "\n");
+                        bw.flush();
+                        dirFlag="-1";
+                        // if(!runningText[hostID.size()].equals("")){
+                        // bw.write("run" + "\n");
+                        // bw.flush();
+                        // }
+                        // else{
+                        // bw.write("other" + "\n");
+                        // bw.flush();
+                        // }
                         System.out.println(order);
                         // if (buf.readLine().equals("mode")) {
                         // System.out.println("dasdsadasdddddd");
@@ -170,10 +224,15 @@ public class Server {
                     } else if (getIDString.equals("image")) {
                         hostID.add(buf.readLine());
                         System.out.println("hostID : " + hostID);
+                        String tmp = buf.readLine();
+                        System.out.println(tmp);
+                        dataPath.add(tmp);
+                        // dataPath = buf.readLine();
                         // cropType = buf.readLine();
                         // System.out.println("cropType : " + cropType);
                         String imageType = buf.readLine();
                         Thread.sleep(300);
+                        dirNumber[hostID.size()] = "none";
                         ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                         try {
                             byte[] buffer = (byte[]) ois.readObject();
@@ -190,7 +249,54 @@ public class Server {
                             e.printStackTrace();
                         }
                         // castMsg2(getIDString);
-                    } else if (getIDString.indexOf(",") < 0) {
+                    } else if (getIDString.equals("text")) {
+                        hostID.add(buf.readLine());
+                        System.out.println("hostID : " + hostID);
+                        String runText = buf.readLine();
+                        runningText[hostID.size()] = runText;
+                        System.out.println("str: " + runText);
+                        String tmp = buf.readLine();
+                        dataPath.add(tmp);
+                        String tmppath = tmp;
+                        tmp = buf.readLine();
+                        System.out.println("dirFlag: " + tmp);
+                        dirFlag = tmp;
+                        dirNumber[hostID.size()] = dirFlag;
+                        tmp = buf.readLine();
+                        String speed = tmp;
+                        textSpeed[hostID.size()] = speed;
+                        Thread.sleep(300);
+                        ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+                        try {
+                            byte[] buffer = (byte[]) ois.readObject();
+                            if(tmppath.indexOf("gif")>-1){
+                                FileOutputStream fos = new FileOutputStream("./run" + hostID.size() + ".gif");
+                                imageSize[hostID.size() - 1] = buffer.length;
+                                System.out.println("buffer len: " + String.valueOf(buffer.length));
+                                fos.write(buffer);
+                                // Thread.sleep(200);
+                                fos.close();
+                                clients.remove(socket);
+                                --count;
+                            }
+
+                            else{
+                                FileOutputStream fos = new FileOutputStream("./run" + hostID.size() + ".jpg");
+                                imageSize[hostID.size() - 1] = buffer.length;
+                                System.out.println("buffer len: " + String.valueOf(buffer.length));
+                                fos.write(buffer);
+                                // Thread.sleep(200);
+                                fos.close();
+                                clients.remove(socket);
+                                --count;
+                            }
+                            // gifToImages("image1.gif");
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    else if (getIDString.indexOf(",") < 0) {
                         userId.add(getIDString);
                         userIp.add(socket.getInetAddress().toString());
                         userImage.add("-1");
@@ -199,8 +305,86 @@ public class Server {
                         Thread.sleep(200);
                         bw.write(userId.size() - 1 + "\n");
                         bw.flush();
-
                         String physicalLength = buf.readLine();
+                        for (int i = 0; i < virtualCommand.length; i++) {
+                            System.out.println(virtualIp[i]);
+                            System.out.println(socket.getInetAddress().toString());
+                            if (virtualIp[i].equals(socket.getInetAddress().toString())) {
+                                System.out.println("7594546");
+                                String[] tmp = virtualCommand[i].split(",");
+                                int imageNumber = Integer.valueOf(tmp[tmp.length - 2]);
+                                String type = ".jpg";
+                                mode = "normal";
+                                File file = new File(".\\image" + imageNumber + ".jpg");
+                                if (file.exists()) {
+                                    type = "jpg";
+                                }
+                                file = new File(".\\image" + imageNumber + ".gif");
+                                if (file.exists()) {
+                                    type = "gif";
+                                }
+                                file = new File(".\\image" + imageNumber + ".mp4");
+                                if (file.exists()) {
+                                    type = "mp4";
+                                }
+                                file = new File(".\\run" + imageNumber + ".jpg");
+                                if (file.exists()) {
+                                    type = "jpg";
+                                    mode = "run";
+                                    mode = mode + "#" + textSpeed[imageNumber];
+                                    // mode = mode + "#" + runningText[imageNumber];
+                                }
+                                file = new File(".\\run" + imageNumber + ".gif");
+                                if (file.exists()) {
+                                    type = "gif";
+                                    mode = "run";
+                                    mode = mode + "#" + textSpeed[imageNumber];
+                                    // mode = mode + "#" + runningText[imageNumber];
+                                }
+                                System.out.println("dirNumber :" +dirNumber[imageNumber]);
+                                if(dirNumber[imageNumber].equals("1")){
+                                    mode = "r"+mode;
+                                }
+                                else if(dirNumber[imageNumber].equals("0")){
+                                    mode = "l"+mode;
+                                }
+                                else if(dirNumber[imageNumber].equals("2")){
+                                    mode = "u"+mode;
+                                }
+                                else if(dirNumber[imageNumber].equals("3")){
+                                    mode = "d"+mode;
+                                }
+                                bw.write(mode+","+virtualCommand[i] + "\n");
+                                bw.flush();
+                                // if(mode.indexOf("run")>-1){
+                                //     FileInputStream fis = new FileInputStream("./run" + imageNumber + "." + type);
+                                //     byte[] buffer = new byte[fis.available()];
+                                //     fis.read(buffer);
+                                //     ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                                //     Thread.sleep(100);
+                                //     oos.writeObject(buffer);
+                                //     // Thread.sleep(200);
+                                //     System.out.println(545646546);
+                                // }
+                                // else{
+                                //     FileInputStream fis = new FileInputStream("./image" + imageNumber + "." + type);
+                                //     byte[] buffer = new byte[fis.available()];
+                                //     fis.read(buffer);
+                                //     ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                                //     Thread.sleep(100);
+                                //     oos.writeObject(buffer);
+                                //     // Thread.sleep(200);
+                                //     System.out.println(545646546);
+                                // }
+
+                                break;
+                            } else if (!virtualIp[i].equals(socket.getInetAddress().toString())
+                                    && i == virtualCommand.length - 1) {
+                                bw.write("None" + "\n");
+                                bw.flush();
+                            }
+                        }
+
                         String[] tmpArray = physicalLength.split(",");
                         physicalX[userId.size() - 1] = Double.parseDouble(tmpArray[0]);
                         physicalY[userId.size() - 1] = Double.parseDouble(tmpArray[1]);
@@ -235,11 +419,33 @@ public class Server {
                     String msg;
                     // int i = 0;
                     while ((msg = buf.readLine()) != null) {
+                        // if (msg.indexOf("play") < 0 && palyFlag == 1) {
+                        //     t2.stop();
+                        // }
                         System.out.println(msg);
                         if (msg.indexOf("clear") >= 0) {
                             castMsg2(msg);
                         } else if (msg.indexOf("play") >= 0) {
+                            Thread.sleep(300);
                             castMsg2(msg);
+                            palyFlag = 1;
+                            // t2.stop();
+                            // t2 = new Thread(new Runnable() {
+                            // @Override
+                            // public void run() {
+                            // while(true){
+                            // try {
+                            // Thread.sleep(7500);
+                            // castMsg2("play");
+                            // } catch (InterruptedException e) {
+                            // // TODO Auto-generated catch block
+                            // e.printStackTrace();
+                            // }
+                            // }
+                            // }
+                            // });
+                            // t2.start();
+
                         } else if (msg.indexOf("physical") >= 0) {
                             Thread.sleep(500);
                             bw.write(phyXString + "?" + phyYString + "\n");
@@ -259,11 +465,12 @@ public class Server {
                             } catch (ClassNotFoundException e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            String[] tmpArray = msg.split(",");
-                            int imageNumber = Integer.valueOf(tmpArray[tmpArray.length - 2]);
-                            System.out.println("imageNumber: " + imageNumber);
+                        } else if (msg.indexOf("virtual") >= 0) {
+                            String[] tmp = msg.split(",");
+                            virtualIp[virtualCount] = tmp[tmp.length - 4];
+                            int imageNumber = Integer.valueOf(tmp[tmp.length - 3]);
                             String type = ".jpg";
+                            mode = "normal";
                             File file = new File(".\\image" + imageNumber + ".jpg");
                             if (file.exists()) {
                                 type = "jpg";
@@ -276,17 +483,79 @@ public class Server {
                             if (file.exists()) {
                                 type = "mp4";
                             }
-
-                            castMsg2(imageSize[imageNumber - 1] +","+ type + "," + msg);
+                            file = new File(".\\run" + imageNumber + ".jpg");
+                            if (file.exists()) {
+                                type = "jpg";
+                                mode = "run";
+                                // mode = mode + "#" + runningText[imageNumber];
+                                mode = mode + "#" + textSpeed[imageNumber];
+                            }
+                            file = new File(".\\run" + imageNumber + ".gif");
+                            if (file.exists()) {
+                                type = "gif";
+                                mode = "run";
+                                // mode = mode + "#" + runningText[imageNumber];
+                                mode = mode + "#" + textSpeed[imageNumber];
+                            }
+                            System.out.println("virtual");
+                            virtualCommand[virtualCount] = type + "," + msg;
+                            virtualCount++;
+                        } else {
+                            String[] tmpArray = msg.split(",");
+                            int imageNumber = Integer.valueOf(tmpArray[tmpArray.length - 2]);
+                            System.out.println("imageNumber: " + imageNumber);
+                            String type = ".jpg";
+                            mode = "normal";
+                            File file = new File(".\\image" + imageNumber + ".jpg");
+                            if (file.exists()) {
+                                type = "jpg";
+                            }
+                            file = new File(".\\image" + imageNumber + ".gif");
+                            if (file.exists()) {
+                                type = "gif";
+                            }
+                            file = new File(".\\image" + imageNumber + ".mp4");
+                            if (file.exists()) {
+                                type = "mp4";
+                            }
+                            file = new File(".\\run" + imageNumber + ".jpg");
+                            if (file.exists()) {
+                                type = "jpg";
+                                mode = "run";
+                                // mode = mode + "#" + runningText[imageNumber];
+                                mode = mode + "#" + textSpeed[imageNumber];
+                            }
+                            file = new File(".\\run" + imageNumber + ".gif");
+                            if (file.exists()) {
+                                type = "gif";
+                                mode = "run";
+                                // mode = mode + "#" + runningText[imageNumber];
+                                mode = mode + "#" + textSpeed[imageNumber];
+                            }
+                            if(dirNumber[imageNumber].equals("1")){
+                                mode = "r"+mode;
+                            }
+                            else if(dirNumber[imageNumber].equals("0")){
+                                mode = "l"+mode;
+                            }
+                            else if(dirNumber[imageNumber].equals("2")){
+                                mode = "u"+mode;
+                            }
+                            else if(dirNumber[imageNumber].equals("3")){
+                                mode = "d"+mode;
+                            }
+                            System.out.println("dirNumber :" +dirNumber[imageNumber]);
+                            System.out.println("mode :" +mode);
+                            castMsg2(mode + "," + imageSize[imageNumber - 1] + "," + type + "," + msg);
                             // Thread.sleep(100);
                             System.out.println("接收到的資料是：" + msg);
                             String unSplite = tmpArray[tmpArray.length - 1];
                             System.out.println("unSplite: " + unSplite);
-                            if (unSplite.indexOf(".") >= 0) {
-                                String[] spliteIP = unSplite.split("\\.");
+                            if (unSplite.indexOf("&") >= 0) {
+                                String[] spliteIP = unSplite.split("&");
                                 System.out.println("spliteIP: " + spliteIP.length);
-                                int[] spliteIPInt = new int[spliteIP.length];
-                                for (int j = 0; j < spliteIP.length; j++) {
+                                int[] spliteIPInt = new int[spliteIP.length - 1];
+                                for (int j = 0; j < spliteIP.length - 1; j++) {
                                     spliteIPInt[j] = Integer.valueOf(spliteIP[j]);
                                     System.out.println("spliteIP: " + spliteIPInt[j]);
                                 }
@@ -471,21 +740,39 @@ public class Server {
                 // 創造網路輸出串流
                 if (imageSended[Integer.valueOf(fileName) - 1][i] == 0) {
                     imageSended[Integer.valueOf(fileName) - 1][i] = 1;
-                    FileInputStream fis = new FileInputStream("./image" + fileName + "." + type);
-                    byte[] buffer = new byte[fis.available()];
-                    fis.read(buffer);
-                    if (clientIp[i] != -1) {
-                        ObjectOutputStream oos = new ObjectOutputStream(clients.get(clientIp[i]).getOutputStream());
-                        Thread.sleep(100);
-                        time1 = System.currentTimeMillis();
-                        oos.writeObject(buffer);
-                        // Thread.sleep(200);
-                        time2 = System.currentTimeMillis();
-                        System.out.println("doSomething()花了：" + (time2 - time1) / 1000 + "秒");
-                        System.out.println(545646546);
-                    }
-                } else {
+                    if (mode.indexOf("run") > -1) {
+                        FileInputStream fis = new FileInputStream("./run" + fileName + "." + type);
+                        byte[] buffer = new byte[fis.available()];
+                        fis.read(buffer);
+                        if (clientIp[i] != -1) {
+                            ObjectOutputStream oos = new ObjectOutputStream(clients.get(clientIp[i]).getOutputStream());
+                            Thread.sleep(100);
+                            time1 = System.currentTimeMillis();
+                            oos.writeObject(buffer);
+                            // Thread.sleep(200);
+                            time2 = System.currentTimeMillis();
+                            System.out.println("doSomething()花了：" + (time2 - time1) / 1000 + "秒");
+                            System.out.println(545646546);
+                        }
+                    } else {
+                        FileInputStream fis = new FileInputStream("./image" + fileName + "." + type);
+                        byte[] buffer = new byte[fis.available()];
+                        fis.read(buffer);
+                        if (clientIp[i] != -1) {
+                            ObjectOutputStream oos = new ObjectOutputStream(clients.get(clientIp[i]).getOutputStream());
+                            Thread.sleep(100);
+                            time1 = System.currentTimeMillis();
+                            oos.writeObject(buffer);
+                            // Thread.sleep(200);
+                            time2 = System.currentTimeMillis();
+                            System.out.println("doSomething()花了：" + (time2 - time1) / 1000 + "秒");
+                            System.out.println(545646546);
+                        }
 
+                    }
+
+                } else {
+                    System.out.println("sendED");
                 }
                 // BufferedReader buf = new BufferedReader(new
                 // InputStreamReader(socket.getInputStream()));
