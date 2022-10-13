@@ -11,7 +11,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 public class simpleSever {
-    private static int serverport = 5050; // 自訂的 Port
+    private static int serverport = 5051; // 自訂的 Port
     private static ServerSocket serverSocket; // 伺服端的Socket
     private static int count = 0; // 計算有幾個 Client 端連線
     private static int order = 0;    

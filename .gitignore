@@ -4,3 +4,7 @@
 *.png
 *iml
 .vscode
+*.class
+testcc.java
+testqq.java
+tests.java

@@ -29,7 +29,7 @@ public class Server {
     private static ArrayList<String> dataPath = new ArrayList();
     // private static ArrayList<String> textSpeed = new ArrayList();
     static ArrayList<Integer> clientIndex = new ArrayList<>();
-    
+
     static String[] runningText = new String[16];
     static String[] dirNumber = new String[16];
     static String[] textSpeed = new String[16];
@@ -200,12 +200,12 @@ public class Server {
                         Thread.sleep(100);
                         bw.write(socket.getInetAddress().toString() + "\n");
                         bw.flush();
-                        bw.write(dataPath.get(dataPath.size()-1) + "\n");
+                        bw.write(dataPath.get(dataPath.size() - 1) + "\n");
                         bw.flush();
-                        System.out.println("dirFlag: "+dirFlag);
+                        System.out.println("dirFlag: " + dirFlag);
                         bw.write(dirFlag + "\n");
                         bw.flush();
-                        dirFlag="-1";
+                        dirFlag = "-1";
                         // if(!runningText[hostID.size()].equals("")){
                         // bw.write("run" + "\n");
                         // bw.flush();
@@ -269,7 +269,7 @@ public class Server {
                         ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                         try {
                             byte[] buffer = (byte[]) ois.readObject();
-                            if(tmppath.indexOf("gif")>-1){
+                            if (tmppath.indexOf("gif") > -1) {
                                 FileOutputStream fos = new FileOutputStream("./run" + hostID.size() + ".gif");
                                 imageSize[hostID.size() - 1] = buffer.length;
                                 System.out.println("buffer len: " + String.valueOf(buffer.length));
@@ -280,7 +280,7 @@ public class Server {
                                 --count;
                             }
 
-                            else{
+                            else {
                                 FileOutputStream fos = new FileOutputStream("./run" + hostID.size() + ".jpg");
                                 imageSize[hostID.size() - 1] = buffer.length;
                                 System.out.println("buffer len: " + String.valueOf(buffer.length));
@@ -341,40 +341,39 @@ public class Server {
                                     mode = mode + "#" + textSpeed[imageNumber];
                                     // mode = mode + "#" + runningText[imageNumber];
                                 }
-                                System.out.println("dirNumber :" +dirNumber[imageNumber]);
-                                if(dirNumber[imageNumber].equals("1")){
-                                    mode = "r"+mode;
+                                System.out.println("dirNumber :" + dirNumber[imageNumber]);
+                                if (dirNumber[imageNumber].equals("1")) {
+                                    mode = "r" + mode;
+                                } else if (dirNumber[imageNumber].equals("0")) {
+                                    mode = "l" + mode;
+                                } else if (dirNumber[imageNumber].equals("2")) {
+                                    mode = "u" + mode;
+                                } else if (dirNumber[imageNumber].equals("3")) {
+                                    mode = "d" + mode;
                                 }
-                                else if(dirNumber[imageNumber].equals("0")){
-                                    mode = "l"+mode;
-                                }
-                                else if(dirNumber[imageNumber].equals("2")){
-                                    mode = "u"+mode;
-                                }
-                                else if(dirNumber[imageNumber].equals("3")){
-                                    mode = "d"+mode;
-                                }
-                                bw.write(mode+","+virtualCommand[i] + "\n");
+                                bw.write(mode + "," + virtualCommand[i] + "\n");
                                 bw.flush();
                                 // if(mode.indexOf("run")>-1){
-                                //     FileInputStream fis = new FileInputStream("./run" + imageNumber + "." + type);
-                                //     byte[] buffer = new byte[fis.available()];
-                                //     fis.read(buffer);
-                                //     ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                                //     Thread.sleep(100);
-                                //     oos.writeObject(buffer);
-                                //     // Thread.sleep(200);
-                                //     System.out.println(545646546);
+                                // FileInputStream fis = new FileInputStream("./run" + imageNumber + "." +
+                                // type);
+                                // byte[] buffer = new byte[fis.available()];
+                                // fis.read(buffer);
+                                // ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                                // Thread.sleep(100);
+                                // oos.writeObject(buffer);
+                                // // Thread.sleep(200);
+                                // System.out.println(545646546);
                                 // }
                                 // else{
-                                //     FileInputStream fis = new FileInputStream("./image" + imageNumber + "." + type);
-                                //     byte[] buffer = new byte[fis.available()];
-                                //     fis.read(buffer);
-                                //     ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
-                                //     Thread.sleep(100);
-                                //     oos.writeObject(buffer);
-                                //     // Thread.sleep(200);
-                                //     System.out.println(545646546);
+                                // FileInputStream fis = new FileInputStream("./image" + imageNumber + "." +
+                                // type);
+                                // byte[] buffer = new byte[fis.available()];
+                                // fis.read(buffer);
+                                // ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
+                                // Thread.sleep(100);
+                                // oos.writeObject(buffer);
+                                // // Thread.sleep(200);
+                                // System.out.println(545646546);
                                 // }
 
                                 break;
@@ -394,12 +393,19 @@ public class Server {
                         phyXString = "";
                         phyYString = "";
                         for (int i = 0; i < userId.size(); i++) {
+                            // if (i == userId.size() - 1) {
+                            // phyXString = phyXString + physicalX[i];
+                            // phyYString = phyYString + physicalY[i];
+                            // } else {
+                            // phyXString = phyXString + physicalX[i] + ",";
+                            // phyYString = phyYString + physicalY[i] + ",";
+                            // }
                             if (i == userId.size() - 1) {
-                                phyXString = phyXString + physicalX[i];
-                                phyYString = phyYString + physicalY[i];
+                                phyYString = phyYString + physicalX[i];
+                                phyXString = phyXString + physicalY[i];
                             } else {
-                                phyXString = phyXString + physicalX[i] + ",";
-                                phyYString = phyYString + physicalY[i] + ",";
+                                phyYString = phyYString + physicalX[i] + ",";
+                                phyXString = phyXString + physicalY[i] + ",";
                             }
                         }
                         System.out.println("send1");
@@ -420,7 +426,7 @@ public class Server {
                     // int i = 0;
                     while ((msg = buf.readLine()) != null) {
                         // if (msg.indexOf("play") < 0 && palyFlag == 1) {
-                        //     t2.stop();
+                        // t2.stop();
                         // }
                         System.out.println(msg);
                         if (msg.indexOf("clear") >= 0) {
@@ -532,20 +538,17 @@ public class Server {
                                 // mode = mode + "#" + runningText[imageNumber];
                                 mode = mode + "#" + textSpeed[imageNumber];
                             }
-                            if(dirNumber[imageNumber].equals("1")){
-                                mode = "r"+mode;
+                            if (dirNumber[imageNumber].equals("1")) {
+                                mode = "r" + mode;
+                            } else if (dirNumber[imageNumber].equals("0")) {
+                                mode = "l" + mode;
+                            } else if (dirNumber[imageNumber].equals("2")) {
+                                mode = "u" + mode;
+                            } else if (dirNumber[imageNumber].equals("3")) {
+                                mode = "d" + mode;
                             }
-                            else if(dirNumber[imageNumber].equals("0")){
-                                mode = "l"+mode;
-                            }
-                            else if(dirNumber[imageNumber].equals("2")){
-                                mode = "u"+mode;
-                            }
-                            else if(dirNumber[imageNumber].equals("3")){
-                                mode = "d"+mode;
-                            }
-                            System.out.println("dirNumber :" +dirNumber[imageNumber]);
-                            System.out.println("mode :" +mode);
+                            System.out.println("dirNumber :" + dirNumber[imageNumber]);
+                            System.out.println("mode :" + mode);
                             castMsg2(mode + "," + imageSize[imageNumber - 1] + "," + type + "," + msg);
                             // Thread.sleep(100);
                             System.out.println("接收到的資料是：" + msg);
