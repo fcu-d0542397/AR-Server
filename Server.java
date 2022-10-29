@@ -58,6 +58,7 @@ public class Server {
 
     // 用 ArrayList 來儲存每個 Client 端連線
     private static ArrayList<Socket> clients = new ArrayList();
+    static int countReadData = 0;
 
     public static void main(String[] args) {
 
@@ -130,6 +131,7 @@ public class Server {
     // 等待接受 Client 端連接
     public static void waitNewClient() {
         try {
+            countReadData = 0;
             Socket socket = serverSocket.accept();
             ++count;
             System.out.println("現在使用者個數：" + count);
@@ -452,9 +454,13 @@ public class Server {
                             // });
                             // t2.start();
 
-                        } else if (msg.indexOf("physical") >= 0) {
-                            Thread.sleep(500);
+                        } else if (msg.indexOf("physical") >= 0 && countReadData <= 20) {
+                            // Thread.sleep(500);
+                            Thread.sleep(300);
                             bw.write(phyXString + "?" + phyYString + "\n");
+                            bw.flush();
+                            countReadData = countReadData + 1;
+                            bw.write(String.valueOf(countReadData)+ "\n");
                             bw.flush();
                         } else if (msg.indexOf("image2") >= 0) {
                             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
