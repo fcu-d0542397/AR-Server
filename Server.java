@@ -454,14 +454,15 @@ public class Server {
                             // });
                             // t2.start();
 
-                        } else if (msg.indexOf("physical") >= 0 && countReadData <= 20) {
+                        } else if (msg.indexOf("physical") >= 0 && countReadData <= 19) {
                             // Thread.sleep(500);
-                            Thread.sleep(300);
+                            Thread.sleep(200);
                             bw.write(phyXString + "?" + phyYString + "\n");
                             bw.flush();
-                            countReadData = countReadData + 1;
-                            bw.write(String.valueOf(countReadData)+ "\n");
-                            bw.flush();
+                            // Thread.sleep(200);
+                            // countReadData = countReadData + 1;
+                            // bw.write(String.valueOf(countReadData)+ "\n");
+                            // bw.flush();
                         } else if (msg.indexOf("image2") >= 0) {
                             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
                             try {
